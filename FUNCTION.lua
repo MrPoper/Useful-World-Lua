@@ -6592,3 +6592,195 @@ function guiSetProgressBarRun ( guiElement, ProgressBarCount, ProgressBarCountPl
   return true
        
 end 
+--____________________________ compareTables   ____________________________--	
+function compareTables(tblToCompare, tblToCompareTo)
+    if (type(tblToCompareTo)=="table") and (type(tblToCompare)=="table") then
+        for k, v in pairs(tblToCompareTo) do
+            if not (type(tblToCompare[k])=="nil") then
+                if (type(v)=="table") then
+                    if not (compareTables(tblToCompare[k], v)) then return false, "Tables not matched at key"..tostring(k) end
+                else
+                    if not (type(v)==type(tblToCompare[k])) then return false, "Values not matched at key"..tostring(k) end
+                end
+            else
+                return false, "nil value"
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
+--____________________________ converMoney   ____________________________--	
+function converMoney(amount)
+	local formatted = amount
+	while true do  
+		formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1.%2')
+		if (k==0) then
+			break
+		end
+	end
+	return formatted
+end
+--____________________________ convertNumber   ____________________________--	
+function convertNumber(number)  
+	local formatted = number  
+	while true do      
+		formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1.%2')    
+		if (k==0) then      
+			break   
+		end  
+	end  
+	return formatted
+end
+--____________________________ createIndexIfNil   ____________________________--	
+function createIndexIfNil(t, i, v)
+    if not (type(i)=="nil") then
+        if (type(t[i])=="nil") then
+            t[i] = v or {}
+        end
+    end
+end
+--____________________________ dxDrawBorder   ____________________________--	
+function dxDrawBorder(x, y, w, h, t, color, postaGECI)
+    dxDrawRectangle(x, y, t, h, color, postaGECI)--// Left
+    dxDrawRectangle(x-t+w, t, h, color, postaGECI)--// Right
+
+    dxDrawRectangle(x, y, w, t, color, postaGECI)--// Top
+    dxDrawRectangle(x, y-t+h, w, t, color, postaGECI)--// Bottom
+end
+
+--// Vector
+function dxDrawBorder(x, y, w, h, t, color, postaGECI)
+    dxDrawRectangle(pos.x, pos.y, t, pos.y, color, postaGECI)--// Left
+    dxDrawRectangle(x-t+pos.x, pos.y, t, pos.y, color, postaGECI)--// Right
+
+    dxDrawRectangle(pos.x, pos.y, pos.x, t, color, postaGECI)--// Top
+    dxDrawRectangle(pos.x, pos.y-t+pos.y, pos.x, t, color, postaGECI)--// Bottom
+end
+--____________________________ dxDrawRoundedBorder   ____________________________--	
+function dxDrawRoundedBorder(x, y, w, h, borderColor, postGUI)
+	if (x) and (y) and (w) and (h) then
+		borderColor = borderColor or tocolor(255, 255, 255, 230)
+
+		dxDrawRectangle(x - 1, y + 1, 1, h - 2, borderColor, postGUI) -- left
+		dxDrawRectangle(x + w, y + 1, 1, h - 2, borderColor, postGUI)-- right
+		dxDrawRectangle(x + 1, y - 1, w - 2, 1, borderColor, postGUI) -- top
+		dxDrawRectangle(x + 1, y + h, w - 2, 1, borderColor, postGUI) -- bottom
+
+		dxDrawRectangle(x, y, 1, 1, borderColor, postGUI)
+		dxDrawRectangle(x + w - 1, y, 1, 1, borderColor, postGUI)
+		dxDrawRectangle(x, y + h - 1, 1, 1, borderColor, postGUI)
+		dxDrawRectangle(x + w - 1, y + h - 1, 1, 1, borderColor, postGUI)
+	end
+end
+--____________________________ dxDrawRoundedRectangle   ____________________________--
+function dxDrawRoundedRectangle(x, y, w, h, borderColor, bgColor, postGUI)
+	if (x) and (y) and (w) and (h) then
+		borderColor = borderColor or tocolor(0, 0, 0, 200)
+		bgColor = bgColor or borderColor
+	
+		--> Background
+		dxDrawRectangle(x, y, w, h, bgColor, postGUI);
+		
+		--> Border
+		dxDrawRectangle(x - 1, y + 1, 1, h - 2, borderColor, postGUI)-- left
+		dxDrawRectangle(x + w, y + 1, 1, h - 2, borderColor, postGUI)-- right
+		dxDrawRectangle(x + 1, y - 1, w - 2, 1, borderColor, postGUI)-- top
+		dxDrawRectangle(x + 1, y + h, w - 2, 1, borderColor, postGUI)-- bottom
+		dxDrawRectangle(x, y, 1, 1, borderColor, postGUI)
+		dxDrawRectangle(x + w - 1, y, 1, 1, borderColor, postGUI)
+		dxDrawRectangle(x, y + h - 1, 1, 1, borderColor, postGUI)
+		dxDrawRectangle(x + w - 1, y + h - 1, 1, 1, borderColor, postGUI)
+	end
+end
+--____________________________ dxGetTextHeight   ____________________________--
+function dxGetTextHeight(text, fScale, font)
+    if (text) and (fScale) and (font) then
+        local fHeight = dxGetFontHeight(1, font)
+        local h = fHeight
+        for _, world in string.gmatch(text, "\n") do
+            h = h+fHeight
+        end
+        return h, fHeight
+    end
+end
+--____________________________ isCursorOnBox   ____________________________--
+cx, cy = 0, 0
+bCursorShown = false
+
+function isCursorOnBox(x, y, w, h)
+    if (bCursorShown) then   
+        return (cx >= x and cx <= x+w and cy >= y and cy <= y+h)
+    end	
+    return false
+end
+--____________________________ getRotatationFromPoint   ____________________________--	
+function getRotatationFromPoint(x1, y1, x2, y2)
+    local t = -math.deg(math.atan2(x2-x1, y2-y1))
+    return t<0 and t+360 or t
+end
+--____________________________ table.copy   ____________________________--	
+function table.copy(orig)
+    local copy = {}
+    for orig_key, orig_value in pairs(orig) do
+        copy[orig_key] = ((type(orig_value)=="table") and table.copy(orig_value)) or orig_value
+    end
+    return copy
+end
+--____________________________ worldBreak   ____________________________--
+function worldBreak(text, fScale, font, w)
+    local finalText = ""
+    for k, world in pairs(split(text, string.byte(" "))) do
+        if (dxGetTextWidth(removeHex(finalText..world), fScale, font)>=w) then
+            finalText = finalText.."\n"..world
+        else
+            finalText = finalText.." "..world
+        end
+    end
+    return finalText
+end
+--____________________________ worldBreak   ____________________________--	
+    
+function worldBreak(text, w, fontScale, font)
+    local lastEnd, lastStart = 0, 0
+    local currentEnd, currentStart
+    local str = ""
+    local currentWorld
+    local sepFromLastWorld
+    while true do
+        currentStart, currentEnd = string.find(text, "%w+", lastEnd+1)
+        if not (currentStart) then break end
+        sepFromLastWorld = string.sub(text, lastEnd+1, currentStart-1)
+        currentWorld = string.sub(text, currentStart, currentEnd)
+        
+        if (dxGetTextWidth(str, fontScale, font)<w) then
+          str = str..sepFromLastWorld..currentWorld
+        else
+          str = str.."\n"..currentWorld
+          print("Break at", currentStart)
+        end
+        lastEnd, lastStart = currentEnd, currentStart
+    end
+    return str
+end
+	
+--____________________________ compareTables   ____________________________--	
+function compareTables(tblToCompare, tblToCompareTo)
+    if (type(tblToCompareTo)=="table") and (type(tblToCompare)=="table") then
+        for k, v in pairs(tblToCompareTo) do
+            if not (type(tblToCompare[k])=="nil") then
+                if (type(v)=="table") then
+                    if not (compareTables(tblToCompare[k], v)) then return false, "Tables not matched at key"..tostring(k) end
+                else
+                    if not (type(v)==type(tblToCompare[k])) then return false, "Values not matched at key"..tostring(k) end
+                end
+            else
+                return false, "nil value"
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
