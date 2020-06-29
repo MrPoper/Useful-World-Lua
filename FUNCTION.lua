@@ -1,5 +1,373 @@
 ------ FUNCTION 
+--_______________________________CreateButtonClose__________________________________________________--#\_oskar_/#
+function CreateButtonClose( GuiElement , text,d)
+	if getElementType(GuiElement) == 'gui-window' then
+		local Text = '|'..text..' |'
+		local Font = 'default-bold-small'
+		local width = dxGetTextWidth(Text, 1, Font)
+		local x = d == 'left' and guiGetSize(GuiElement, false)-50 or d == 'right' and 5
+		local ln = guiCreateLabel(x,2,width+5,15,Text, false,GuiElement)
+		guiSetProperty(ln ,'ClippedByParent', 'False')
+		guiSetProperty(ln ,'AlwaysOnTop', 'True')
+		guiSetFont(ln , Font)
+		guiLabelSetColor(ln ,150,150,150)
+		guiLabelSetHorizontalAlign(ln , 'center', false)
+	--- Events
+		addEventHandler('onClientGUIClick',ln, function() guiSetVisible(GuiElement, false ) end,false)
+		addEventHandler('onClientMouseEnter',ln, function() guiLabelSetColor(source ,255, 69, 59) end,false)
+		addEventHandler('onClientMouseLeave',ln, function() guiLabelSetColor(source ,150,150,150) end,false)	
+	else
+		print('This function is a static function the Window')
+	end
+end
+
+--- Test Code
+window1 = guiCreateWindow(0.01, 0.04, 0.70, 0.70, "Window1", true)
+window2 = guiCreateWindow(0.43, 0.04, 0.38, 0.29, "Window2", true)
+
+for k,element in ipairs(getElementsByType('gui-window',getResourceGUIElement(getThisResource()))) do
+CreateButtonClose ( element,'Close','right' )
+--CreateButtonClose ( element,'Close','left' )
+end
+--____________________________________FormatSize_____________________________________________--#x1AhMeD-09
+function FormatSize ( size )
+    local Sizes = { { 9 , 'GB' } , { 7 , 'MB' } , { 4 , 'KB' } , { 1 , 'B' } }
+    if size and tonumber ( size ) and size:len ( ) > 0 then
+        local size = tostring ( size )
+        for _ , value in ipairs ( Sizes ) do
+            if size:len ( ) >= value [ 1 ] then
+                return ( size:sub ( 1 , size:len ( ) , ( value [ 1 ] >= 9 and - 9 or value [ 1 ] - 1 ) ) .. '.' .. size:sub ( 2 , size:len ( ) - ( ( value [ 1 ] == 9 and - 7 ) or ( value [ 1 ] == 7 and - 4 ) or ( value [ 1 ] == 4 and - 1 ) ) ) .. ' ' .. value [ 2 ] )
+            end
+        end
+    end
+    return size
+end
+--___________________________________isStringHaveHex______________________________________________---Ilker.
+function isStringHaveHex ( String )
+return ( type ( String ) == "string" and String:find("#%x%x%x%x%x%x") and true or false )
+end
+-- Test code
+print ( tostring ( isStringHaveHex ( "Hello World" ) ) ) -- result : false 
+print ( tostring ( isStringHaveHex ( 1231123 ) ) ) -- result : false 
+print ( tostring ( isStringHaveHex ( "Hello #ffffffWorld" ) ) ) -- result : true 
+
+--____________________________________guiSetStaticImageMovable_____________________________________________--MrKAREEM
+function guiSetStaticImageMovable(Element,state)
+if Element and state then
+if getElementType ( Element ) == "gui-staticimage" and state == true or state == false then
+setElementData(Element,'Movable',state)
+end
+end
+end
+addEventHandler( "onClientGUIMouseDown", getRootElement( ),
+function ( btn, x, y )
+if btn ~= "left" then return end
+if not getElementData(source,'Movable') then return end
+clickedElement = source;
+local elementPos = { guiGetPosition( source, false ) };
+offsetPos = { x - elementPos[ 1 ], y - elementPos[ 2 ] };
+end
+);
+addEventHandler( "onClientGUIMouseUp", getRootElement( ),
+function ( btn, x, y )
+if btn ~= "left" then return end
+clickedElement = nil;
+end
+);
+addEventHandler( "onClientCursorMove", getRootElement( ),
+function ( _, _, x, y )
+if not clickedElement then return end
+guiSetPosition( clickedElement, x - offsetPos[ 1 ], y - offsetPos[ 2 ], false );
+end
+);
+
+-- test code
+movable = guiCreateStaticImage(353, 318, 250, 188, ":guieditor/images/examples/mtalogo.png", false)
+guiSetStaticImageMovable(movable,true) -- تتحرك
+
+static = guiCreateStaticImage(819, 318, 250, 188, ":guieditor/images/examples/mtalogo.png", false)
+guiSetStaticImageMovable(static,false) -- لا تتحرك
+--________________________________pairsByKeys_________________________________________________--Master_MTA
+function pairsByKeys (t,neg)
+    local neg = neg or false
+    local a = {}
+    local s = {}
+    for n in pairs(t) do  table.insert(a,(neg and string.lower(n) ) or n) if (neg and string.sub(n,1,1) == string.upper(string.sub(n,1,1)) ) then s[string.lower(n)]=n  end  end
+    table.sort(a)
+    local i = 0   
+    local iter = function ()
+      i = i + 1
+      if a[i] == nil then return nil
+      else 
+        if (neg and s[a[i]] ) then 
+            return  s[a[i]],t[s[a[i]]]
+        else
+            return a[i], t[a[i]]
+        end  
+      end
+    end
+    return iter
+  end
+--- test code
+local ta={
+['F']='hi',
+  ['g'] = 'hello',
+  ['a'] = 'yes',
+  ['b'] = 'no',
+}
+--usage num 1
+for k,v in pairsByKeys (t) do 
+	print(k,v)
+  --[[
+  output
+  F - hi
+  a - yes
+  b - no
+  g - hello
+  ]]--
+end
+--usage num 2 neglecting letter case
+for k,v in pairsByKeys (t,true) do 
+	print(k,v)
+  --[[
+  output
+  a - yes
+  b - no
+  F - hi
+  g - hello
+  ]]--
+end
+--_______________________________getFixedNumberFromString__________________________________________________--Master_MTA
+function getFixedNumberFromString(str,form)
+    return (form[string.gsub(string.match(str,"%W+"),"%s+",'')] and tonumber(string.match(str,"%d+")..form[string.gsub(string.match(str,"%W+"),"%s+",'')]) ) or false
+end
+--example
+local format = {
+    ['K']='000',
+    ['الف']='000',
+}
+local num = getFixedNumberFromString("50K",format)
+print(num)--printing 50000
+local num = getFixedNumberFromString("50الف",format)
+print(num)--printing 50000
+--____________________________________getSkinNameFromID_____________________________________________--Live
+local skinsTable = {
+[0] = "CJ", [1] = "Truth", [2] = "Maccer", [7] = "Casual JeanJacket", [9] = "Business Lady",
+[10] = "Old Fat Lady", [11] = "Card Dealer 1", [12] = "Classy Gold Hooker", [13] = "Homegirl", [14] = "Floral Shirt",
+[15] = "Plaid Baldy", [16] = "Earmuff Worker", [17] = "Black suit", [18] = "Black Beachguy", [19] = "Beach Gangsta",
+[20] = "Fresh Prince", [21] = "Striped Gangsta", [22] = "Orange Sportsman", [23] = "Skater Kid", [24] = "LS Coach",
+[25] = "Varsity jacket", [26] = "Hiker", [27] = "Construction 1", [28] = "Black Dealer", [29] = "White Dealer",
+[30] = "Religious Essey", [31] = "Fat Cowgirl", [32] = "Eyepatch", [33] = "Bounty Hunter", [34] = "Marlboro Man",
+[35] = "Fisherman", [36] = "Mailman", [37] = "Baseball Dad", [38] = "Old Golf Lady", [39] = "Old Maid",
+[40] = "Classy Dark Hooker", [41] = "Tracksuit Girl", [43] = "Porn Producer", [44] = "Tatooed Plaid", [45] = "Beach Mustache",
+[46] = "Dark Romeo", [47] = "Top Button Essey", [49] = "Ninja Sensei", [50] = "Mechanic", [51] = "Black Bicyclist",
+[52] = "White Bicyclist", [53] = "Golf Lady", [54] = "Hispanic Woman", [55] = "Rich Bitch", [56] = "Legwarmers 1",
+[57] = "Chinese Businessman", [58] = "Chinese Plaid", [59] = "Chinese Romeo", [60] = "Chinese Casual", [61] = "Pilot",
+[62] = "Pajama Man 1", [63] = "Trashy Hooker", [64] = "Transvestite", [66] = "Varsity Bandits", [67] = "Red Bandana",
+[68] = "Preist", [69] = "Denim Girl", [70] = "Scientist", [71] = "Security Guard", [72] = "Bearded Hippie",
+[73] = "Flag Bandana", [75] = "Skanky Hooker", [76] = "Businesswoman 1", [77] = "Bag Lady", [78] = "Homeless Scarf",
+[79] = "Fat Homeless", [80] = "Red Boxer", [81] = "Blue Boxer", [82] = "Fatty Elvis", [83] = "Whitesuit Elvis",
+[84] = "Bluesuit Elvis", [85] = "Furrcoat Hooker", [87] = "Firecrotch", [88] = "Casual Old Lady", [89] = "Cleaning Lady",
+[90] = "Barely Covered", [91] = "Sharon Stone", [92] = "Rollergirl", [93] = "Hoop Earrings 1", [94] = "Andy Capp",
+[95] = "Poor Old Man", [96] = "Soccer Player", [97] = "Baywatch Dude", [99] = "Rollerguy", [100] = "Biker Blackshirt",
+[101] = "Jacker Hippie", [102] = "Baller Shirt", [103] = "Baller Jacket", [104] = "Baller Sweater", [105] = "Grove Sweater",
+[106] = "Grove Tropbutton", [107] = "Grove Jersey", [108] = "Vagos Topless", [109] = "Vagos Pants", [110] = "Vagos Shorts",
+[111] = "Russian Muscle", [112] = "Russian Hitman", [113] = "Russian Boss", [114] = "Aztecas Stripes", [115] = "Aztecas Jacket",
+[116] = "Aztecas Shorts", [117] = "Triad 1", [118] = "Triad 2", [119] = "Triad 3", [120] = "Sinacco Suit",
+[121] = "Da Nang Army", [122] = "Da Nang Bandana", [123] = "Da Nang Shades", [124] = "Sinacco Muscle", [125] = "Mafia Enforcer",
+[126] = "Mafia Wiseguy", [127] = "Mafia Hitman", [128] = "Native Rancher", [129] = "Native Librarian", [130] = "Native Ugly",
+[131] = "Native Sexy", [132] = "Native Geezer", [133] = "Furys Trucker", [134] = "Homeless Smoker", [135] = "Skullcap Hobo",
+[136] = "Old Rasta", [137] = "Boxhead", [138] = "Bikini Tattoo", [139] = "Yellow Bikini", [140] = "Buxom Bikini",
+[141] = "Cute Librarian", [142] = "African 1", [143] = "Sam Jackson", [144] = "Drug Worker 1", [145] = "Drug Worker 2",
+[146] = "Drug Worker 3", [147] = "Sigmund Freud", [148] = "Businesswoman 2", [149] = "Businesswoman 2 b", [150] = "Businesswoman 3",
+[151] = "Melanie", [152] = "Schoolgirl 1", [153] = "Foreman", [154] = "Beach Blonde", [155] = "Pizza Guy",
+[156] = "Old Reece", [157] = "Farmer Girl", [158] = "Farmer", [159] = "Farmer Redneck", [160] = "Bald Redneck",
+[161] = "Smoking Cowboy", [162] = "Inbred", [163] = "Casino Bouncer 1", [164] = "Casino Bouncer 2", [165] = "Agent Kay",
+[166] = "Agent Jay", [167] = "Chicken", [168] = "Hotdog Vender", [169] = "Asian Escort", [170] = "PubeStache Tshirt",
+[171] = "Card Dealer 2", [172] = "Card Dealer 3", [173] = "Rifa Hat", [174] = "Rifa Vest", [175] = "Rifa Suspenders",
+[176] = "Style Barber", [177] = "Vanilla Ice Barber", [178] = "Masked Stripper", [179] = "War Vet", [180] = "Bball Player",
+[181] = "Punk", [182] = "Pajama Man 2", [183] = "Klingon", [184] = "Neckbeard", [185] = "Nervous Guy",
+[186] = "Teacher", [187] = "Japanese Businessman 1", [188] = "Green Shirt", [189] = "Valet", [190] = "Barbara Schternvart",
+[191] = "Helena Wankstein", [192] = "Michelle Cannes", [193] = "Katie Zhan", [194] = "Millie Perkins", [195] = "Denise Robinson",
+[196] = "Aunt May", [197] = "Smoking Maid", [198] = "Ranch Cowgirl", [199] = "Heidi", [200] = "Hairy Redneck",
+[201] = "Trucker Girl", [202] = "Beer Trucker", [203] = "Ninja 1", [204] = "Ninja 2", [205] = "Burger Girl",
+[206] = "Money Trucker", [207] = "Grove Booty", [209] = "Noodle Vender", [210] = "Sloppy Tourist", [211] = "Staff Girl",
+[212] = "Tin Foil Hat", [213] = "Hobo Elvis", [214] = "Caligula Waitress", [215] = "Explorer", [216] = "Turtleneck",
+[217] = "Staff Guy", [218] = "Old Woman", [219] = "Lady In Red", [220] = "African 2", [221] = "Beardo Casual",
+[222] = "Beardo Clubbing", [223] = "Greasy Nightclubber", [224] = "Elderly Asian 1", [225] = "Elderly Asian 2", [226] = "Legwarmers 2",
+[227] = "Japanese Businessman 2", [228] = "Japanese Businessman 3", [229] = "Asian Tourist", [230] = "Hooded Hobo", [231] = "Grannie",
+[232] = "Grouchy lady", [233] = "Hoop Earrings 2", [234] = "Buzzcut", [235] = "Retired Tourist", [236] = "Happy Old Man",
+[237] = "Leopard Hooker", [238] = "Amazon", [240] = "Hugh Grant", [241] = "Afro Brother", [242] = "Dreadlock Brother",
+[243] = "Ghetto Booty", [244] = "Lace Stripper", [245] = "Ghetto Ho", [246] = "Cop Stripper", [247] = "Biker Vest",
+[248] = "Biker Headband", [249] = "Pimp", [250] = "Green Tshirt", [251] = "Lifeguard", [252] = "Naked Freak",
+[253] = "Bus Driver", [254] = "Biker Vest b", [255] = "Limo Driver", [256] = "Shoolgirl 2", [257] = "Bondage Girl",
+[258] = "Joe Pesci", [259] = "Chris Penn", [260] = "Construction 2", [261] = "Southerner", [262] = "Pajama Man 2 b",
+[263] = "Asian Hostess", [264] = "Whoopee the Clown", [265] = "Tenpenny", [266] = "Pulaski", [267] = "Hern",
+[268] = "Dwayne", [269] = "Big Smoke", [270] = "Sweet", [271] = "Ryder", [272] = "Forelli Guy",
+[274] = "Medic 1", [275] = "Medic 2", [276] = "Medic 3", [277] = "Fireman LS", [278] = "Fireman LV",
+[279] = "Fireman SF", [280] = "Cop 1", [281] = "Cop 2", [282] = "Cop 3", [283] = "Cop 4",
+[284] = "Cop 5", [285] = "SWAT", [286] = "FBI", [287] = "Army", [288] = "Cop 6",
+[290] = "Rose", [291] = "Kent Paul", [292] = "Cesar", [293] = "OG Loc", [294] = "Wuzi Mu",
+[295] = "Mike Toreno", [296] = "Jizzy", [297] = "Madd Dogg", [298] = "Catalina", [299] = "Claude from GTA 3",
+[300] = "Ryder", [301] = "Ryder Robber", [302] = "Emmet", [303] = "Andre", [304] = "Kendl",
+[305] = "Jethro", [306] = "Zero", [307] = "T-bone Mendez", [308] = "Sindaco Guy", [309] = "Janitor",
+[310] = "Big Bear", [311] = "Big Smoke with Vest", [312] = "Physco", 
+}
+function getSkinNameFromID(i)
+    local id = tonumber (i)
+        assert(id, "Bad argument 1 @ getSkinNameFromID [Number expected, got "..type(i).."]")
+    local name = skinsTable[id]
+        assert(name,"Bad argument 1 @ getSkinNameFromID [Invaild skin ID]")
+    return name 
+end
+--__________________________________getSkinIDFromName_______________________________________________--live
+local skinsTable = {
+["cj"] = 0, ["truth"] = 1, ["maccer"] = 2, ["casual jeanjacket"] = 7, ["business lady"] = 9, ["old fat lady"] = 10,
+["card dealer 1"] = 11, ["classy gold hooker"] = 12, ["homegirl"] = 13, ["floral shirt"] = 14, ["plaid baldy"] = 15, ["earmuff worker"] = 16,
+["black suit"] = 17, ["black beachguy"] = 18, ["beach gangsta"] = 19, ["fresh prince"] = 20, ["striped gangsta"] = 21, ["orange sportsman"] = 22,
+["skater kid"] = 23, ["ls coach"] = 24, ["varsity jacket"] = 25, ["hiker"] = 26, ["construction 1"] = 27, ["black dealer"] = 28,
+["white dealer"] = 29, ["religious essey"] = 30, ["fat cowgirl"] = 31, ["eyepatch"] = 32, ["bounty hunter"] = 33, ["marlboro man"] = 34,
+["fisherman"] = 35, ["mailman"] = 36, ["baseball dad"] = 37, ["old golf lady"] = 38, ["old maid"] = 39, ["classy dark hooker"] = 40,
+["tracksuit girl"] = 41, ["porn producer"] = 43, ["tatooed plaid"] = 44, ["beach mustache"] = 45, ["dark romeo"] = 46, ["top button essey"] = 47,
+["ninja sensei"] = 49, ["mechanic"] = 50, ["black bicyclist"] = 51, ["white bicyclist"] = 52, ["golf lady"] = 53, ["hispanic woman"] = 54,
+["rich bitch"] = 55, ["legwarmers 1"] = 56, ["chinese businessman"] = 57, ["chinese plaid"] = 58, ["chinese romeo"] = 59, ["chinese casual"] = 60,
+["pilot"] = 61, ["pajama man 1"] = 62, ["trashy hooker"] = 63, ["transvestite"] = 64, ["varsity bandits"] = 66, ["red bandana"] = 67,
+["preist"] = 68, ["denim girl"] = 69, ["scientist"] = 70, ["security guard"] = 71, ["bearded hippie"] = 72, ["flag bandana"] = 73,
+["skanky hooker"] = 75, ["businesswoman 1"] = 76, ["bag lady"] = 77, ["homeless scarf"] = 78, ["fat homeless"] = 79, ["red boxer"] = 80,
+["blue boxer"] = 81, ["fatty elvis"] = 82, ["whitesuit elvis"] = 83, ["bluesuit elvis"] = 84, ["furrcoat hooker"] = 85, ["firecrotch"] = 87,
+["casual old lady"] = 88, ["cleaning lady"] = 89, ["barely covered"] = 90, ["sharon stone"] = 91, ["rollergirl"] = 92, ["hoop earrings 1"] = 93,
+["andy capp"] = 94, ["poor old man"] = 95, ["soccer player"] = 96, ["baywatch dude"] = 97, ["rollerguy"] = 99, ["biker blackshirt"] = 100,
+["jacker hippie"] = 101, ["baller shirt"] = 102, ["baller jacket"] = 103, ["baller sweater"] = 104, ["grove sweater"] = 105, ["grove tropbutton"] = 106,
+["grove jersey"] = 107, ["vagos topless"] = 108, ["vagos pants"] = 109, ["vagos shorts"] = 110, ["russian muscle"] = 111, ["russian hitman"] = 112,
+["russian boss"] = 113, ["aztecas stripes"] = 114, ["aztecas jacket"] = 115, ["aztecas shorts"] = 116, ["triad 1"] = 117, ["triad 2"] = 118,
+["triad 3"] = 119, ["sinacco suit"] = 120, ["da nang army"] = 121, ["da nang bandana"] = 122, ["da nang shades"] = 123, ["sinacco muscle"] = 124,
+["mafia enforcer"] = 125, ["mafia wiseguy"] = 126, ["mafia hitman"] = 127, ["native rancher"] = 128, ["native librarian"] = 129, ["native ugly"] = 130,
+["native sexy"] = 131, ["native geezer"] = 132, ["furys trucker"] = 133, ["homeless smoker"] = 134, ["skullcap hobo"] = 135, ["old rasta"] = 136,
+["boxhead"] = 137, ["bikini tattoo"] = 138, ["yellow bikini"] = 139, ["buxom bikini"] = 140, ["cute librarian"] = 141, ["african 1"] = 142,
+["sam jackson"] = 143, ["drug worker 1"] = 144, ["drug worker 2"] = 145, ["drug worker 3"] = 146, ["sigmund freud"] = 147, ["businesswoman 2"] = 148,
+["businesswoman 2 b"] = 149, ["businesswoman 3"] = 150, ["melanie"] = 151, ["schoolgirl 1"] = 152, ["foreman"] = 153, ["beach blonde"] = 154,
+["pizza guy"] = 155, ["old reece"] = 156, ["farmer girl"] = 157, ["farmer"] = 158, ["farmer redneck"] = 159, ["bald redneck"] = 160,
+["smoking cowboy"] = 161, ["inbred"] = 162, ["casino bouncer 1"] = 163, ["casino bouncer 2"] = 164, ["agent kay"] = 165, ["agent jay"] = 166,
+["chicken"] = 167, ["hotdog vender"] = 168, ["asian escort"] = 169, ["pubestache tshirt"] = 170, ["card dealer 2"] = 171, ["card dealer 3"] = 172,
+["rifa hat"] = 173, ["rifa vest"] = 174, ["rifa suspenders"] = 175, ["style barber"] = 176, ["vanilla ice barber"] = 177, ["masked stripper"] = 178,
+["war vet"] = 179, ["bball player"] = 180, ["punk"] = 181, ["pajama man 2"] = 182, ["klingon"] = 183, ["neckbeard"] = 184,
+["nervous guy"] = 185, ["teacher"] = 186, ["japanese businessman 1"] = 187, ["green shirt"] = 188, ["valet"] = 189, ["barbara schternvart"] = 190,
+["helena wankstein"] = 191, ["michelle cannes"] = 192, ["katie zhan"] = 193, ["millie perkins"] = 194, ["denise robinson"] = 195, ["aunt may"] = 196,
+["smoking maid"] = 197, ["ranch cowgirl"] = 198, ["heidi"] = 199, ["hairy redneck"] = 200, ["trucker girl"] = 201, ["beer trucker"] = 202,
+["ninja 1"] = 203, ["ninja 2"] = 204, ["burger girl"] = 205, ["money trucker"] = 206, ["grove booty"] = 207, ["noodle vender"] = 209,
+["sloppy tourist"] = 210, ["staff girl"] = 211, ["tin foil hat"] = 212, ["hobo elvis"] = 213, ["caligula waitress"] = 214, ["explorer"] = 215,
+["turtleneck"] = 216, ["staff guy"] = 217, ["old woman"] = 218, ["lady in red"] = 219, ["african 2"] = 220, ["beardo casual"] = 221,
+["beardo clubbing"] = 222, ["greasy nightclubber"] = 223, ["elderly asian 1"] = 224, ["elderly asian 2"] = 225, ["legwarmers 2"] = 226, ["japanese businessman 2"] = 227,
+["japanese businessman 3"] = 228, ["asian tourist"] = 229, ["hooded hobo"] = 230, ["grannie"] = 231, ["grouchy lady"] = 232, ["hoop earrings 2"] = 233,
+["buzzcut"] = 234, ["retired tourist"] = 235, ["happy old man"] = 236, ["leopard hooker"] = 237, ["amazon"] = 238, ["hugh grant"] = 240,
+["afro brother"] = 241, ["dreadlock brother"] = 242, ["ghetto booty"] = 243, ["lace stripper"] = 244, ["ghetto ho"] = 245, ["cop stripper"] = 246,
+["biker vest"] = 247, ["biker headband"] = 248, ["pimp"] = 249, ["green tshirt"] = 250, ["lifeguard"] = 251, ["naked freak"] = 252,
+["bus driver"] = 253, ["biker vest b"] = 254, ["limo driver"] = 255, ["shoolgirl 2"] = 256, ["bondage girl"] = 257, ["joe pesci"] = 258,
+["chris penn"] = 259, ["construction 2"] = 260, ["southerner"] = 261, ["pajama man 2 b"] = 262, ["asian hostess"] = 263, ["whoopee the clown"] = 264,
+["tenpenny"] = 265, ["pulaski"] = 266, ["hern"] = 267, ["dwayne"] = 268, ["big smoke"] = 269, ["sweet"] = 270,
+["ryder"] = 271, ["forelli guy"] = 272, ["medic 1"] = 274, ["medic 2"] = 275, ["medic 3"] = 276, ["fireman ls"] = 277,
+["fireman lv"] = 278, ["fireman sf"] = 279, ["cop 1"] = 280, ["cop 2"] = 281, ["cop 3"] = 282, ["cop 4"] = 283,
+["cop 5"] = 284, ["swat"] = 285, ["fbi"] = 286, ["army"] = 287, ["cop 6"] = 288, ["rose"] = 290,
+["kent paul"] = 291, ["cesar"] = 292, ["og loc"] = 293, ["wuzi mu"] = 294, ["mike toreno"] = 295, ["jizzy"] = 296,
+["madd dogg"] = 297, ["catalina"] = 298, ["claude from gta 3"] = 299, ["ryder"] = 300, ["ryder robber"] = 301, ["emmet"] = 302,
+["andre"] = 303, ["kendl"] = 304, ["jethro"] = 305, ["zero"] = 306, ["t-bone mendez"] = 307, ["sindaco guy"] = 308,
+["janitor"] = 309, ["big bear"] = 310, ["big smoke with vest"] = 311, ["physco"] = 312}
+function getSkinIDFromName(name)
+    assert( type(name) == "string","Bad argument 1 @ getSkinIDFromName [String expected, got " .. type(name) .. "]")
+    return skinsTable[name:lower()] or false 
+end
+
+
+--- exp 
+addCommandHandler ("getskinid",
+function (player,_,name)
+    outputChatBox(getSkinIDFromName(name) or "N/A",player)
+    end
+)
+--__________________________________createBlipText_______________________________________________--Master_MTA
+local texts= {}
+local counter = 1
+function createBlipText(text,x,y,size,color,font ,rot)
+    local size = size or 1.3
+    local font = font or "default"
+    local color = color or tocolor(255,255,255,255)
+    local rot = rot or 0
+    texts[counter]={text,x,y,size,font ,rot,color}
+    counter = counter+1
+    return texts[counter-1]
+end
+local blip = createBlipText("Test" ,591.02747, 871.34741 )
+local screenSize = Vector2(guiGetScreenSize())
+local function drawWorldPosMapText()
+    if isPlayerMapVisible() then
+        for k ,v in pairs( texts ) do
+            local worldPos = Vector2(v[2] , v[3]) 
+            local mapMin, mapMax
+            do
+                local mx, my, Mx, My = getPlayerMapBoundingBox()
+                if mx then
+                    mapMin = Vector2(mx, my)
+                    mapMax = Vector2(Mx, My)
+                else
+                    return
+                end
+            end
+            local fMx, fMy = (worldPos.x + 3000) / 6000, -(worldPos.y - 3000) / 6000
+            local fmx, fmy = 1 - fMx, 1 - fMy
+            local screenMapPos = Vector2((fmx * mapMin.x) + (fMx * mapMax.x), (fmy * mapMin.y) + (fMy * mapMax.y))
+            if screenMapPos.x >= 0 and screenMapPos.y >= 0 and screenMapPos.x <= screenSize.x and screenMapPos.y <= screenSize.y then
+                local width = dxGetTextWidth(v[1],v[4], v[5])
+                dxDrawText(v[1], screenMapPos.x - (width / 2), screenMapPos.y, screenMapPos.x + (width / 2), screenMapPos.y, v[7], v[4], v[5], "center", "center" ,false,false,false,false,false,v[6])
+            end
+        end
+    end
+end
+addEventHandler("onClientRender", root, drawWorldPosMapText)
+--___________________________________setTableReverse______________________________________________--#Mr.Pop
+function setTableReverse(_table_,nim)
+    local t = {}
+    for i , v in pairs(_table_)do
+        if nim then
+            t[nim[i]] = i
+        else
+            t[v] = i
+        end
+    end
+    return t
+end
+---- test code 
+local t1 = { ['pop'] = 'admin',['issam'] = 'player',['sld'] = 'mod'}
+  
+  
+  
+function getPlayerRank(player)
+      return t1[player]
+end
+function getRankPlayer(rank)
+    return   setTableReverse(t1)[rank]
+end
+  
+print(getPlayerRank('pop'),getRankPlayer('admin')) --- OUTPUT : admin     pop
 --_________________________________________________________________________________--
+
+
+--_________________________________________________________________________________--
+
+--_________________________________________________________________________________--
+
+
+--_________________________________________________________________________________--
+
+--_________________________________________________________________________________--
+
+--_________________________________________________________________________________--
+
+--_________________________________________________________________________________--
+
+--_________________________________________________________________________________--
+
+--_________________________________________________________________________________--
+
 
 local sx, sy = guiGetScreenSize() 
 function centerTheGUI( guiElement ) 
